@@ -1,0 +1,85 @@
+base_model: Qwen/Qwen2.5-Math-1.5B-Instruct
+model_type: AutoModelForTokenClassification
+num_labels: 2
+tokenizer_type: AutoTokenizer
+
+load_in_8bit: false
+load_in_4bit: false
+strict: false
+
+process_reward_model: true
+
+datasets:
+  - path: jacopo-minniti/MATH-PUM-qwen2.5-1.5B 
+    name: entropy_binary
+    type: stepwise_supervised
+    step_separator: "<extra_0>"
+    train_on_last_step_only: false
+    split: train
+
+test_datasets:
+  - path: jacopo-minniti/MATH-PUM-qwen2.5-1.5B
+    name: entropy_binary
+    type: stepwise_supervised
+    step_separator: "<extra_0>"
+    train_on_last_step_only: false
+    split: test
+
+special_tokens:
+  additional_special_tokens:
+    - "<extra_0>"
+
+output_dir: models/entropy-1.5B
+remove_unused_columns: false
+
+sequence_len: 4096
+sample_packing: true
+eval_sample_packing: true
+pad_to_sequence_len: true
+
+wandb_project: pum
+wandb_entity:
+wandb_watch:
+wandb_name: Qwen2.5-1.5B-entropy-binary
+wandb_log_model:
+
+
+gradient_accumulation_steps: 4
+micro_batch_size: 8
+eval_batch_size: 8
+num_epochs: 5
+optimizer: adamw_torch_fused
+lr_scheduler: cosine
+learning_rate: 5e-4
+
+
+gradient_checkpointing: true
+gradient_checkpointing_kwargs:
+  use_reentrant: false
+
+train_on_inputs: false
+group_by_length: false
+bf16: auto
+fp16:
+tf32: true
+
+early_stopping_patience:
+resume_from_checkpoint:
+local_rank:
+logging_steps: 5
+xformers_attention:
+# flash_attention: true
+
+warmup_ratio: 0.4
+save_strategy: "epoch"
+saves_per_epoch: 1
+evals_per_epoch: 1
+
+debug:
+deepspeed: configs/deepspeed_config.json
+weight_decay: 0.1
+fsdp:
+fsdp_config:
+
+hub_model_id: jacopo-minniti/Qwen2.5-Math-1.5B-PUM-entropy_binary
+hub_strategy: "end"

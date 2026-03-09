@@ -1,0 +1,35 @@
+compute_environment: LOCAL_MACHINE
+debug: false
+deepspeed_config:
+  gradient_accumulation_steps: 4
+  gradient_clipping: 1.0
+  zero3_init_flag: false        # only relevant for stage 3, so disable
+  zero3_save_16bit_model: false # not needed in stage 2
+  zero_stage: 2
+  bf16:
+    enabled: true
+  fp16:
+    enabled: false
+  zero_optimization:
+    stage: 2
+    offload_optimizer: false     # stays false unless you want CPU offload
+    offload_param: false
+    allgather_partitions: true   # useful for stage 2 efficiency
+    reduce_scatter: true
+    contiguous_gradients: true
+    overlap_comm: true           # overlap communication and computation
+    round_robin_gradients: true  # balances gradient partitioning
+distributed_type: DEEPSPEED
+downcast_bf16: 'no'
+enable_cpu_affinity: false
+machine_rank: 0
+main_training_function: main
+mixed_precision: bf16
+num_machines: 1
+num_processes: 4
+rdzv_backend: static
+same_network: true
+tpu_env: []
+tpu_use_cluster: false
+tpu_use_sudo: false
+use_cpu: false

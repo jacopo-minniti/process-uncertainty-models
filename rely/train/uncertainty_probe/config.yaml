@@ -1,0 +1,61 @@
+run_name: "uncertainty_run"
+task: "classification"  # Options: "classification", "regression"
+model_type: "mlp"       # Options: "linear", "mlp"
+output_file: "probe.pth"
+
+# Dataset configuration
+dataset:
+  # For local datasets: provide separate train and test files
+  train_file: "train.pt"
+  test_file: "test.pt"
+
+  # OR for HuggingFace datasets: provide dataset name and optional subset
+  # hf_dataset: "jacopo-minniti/uats-prm-nn-long-4"
+  # subset: "fill-10"  # Optional: only for HF datasets
+  
+  # Common options
+  is_hf_dataset: false  # Set to true if using HF dataset
+
+activation_field: "cut_cot_activations"  # Options: "activations", "cut_cot_activations"
+
+preprocessing:
+  percentage_dataset: 1  # 0.0-1.0
+  normalize_inputs: false  # Normalize input features to zero mean, unit variance
+
+# Training Hyperparameters
+training:
+  epochs: 256
+  batch_size: 4096
+  learning_rate: 5.0e-4  
+  weight_decay: 1.0e-1
+  val_split: 0.15
+  patience: 15  # Early stopping patience
+  scheduler:
+    enabled: true
+    factor: 0.5
+    patience: 5
+
+# Task-Specific Settings
+task_specific:
+  classification:
+    label_type: "entropy"  # Options: "hard", "soft", "entropy", "variance"
+    soft_label_threshold: 0.01  # Threshold for binarizing soft/entropy labels
+    
+    # Evaluation
+    val_threshold: "auto"  # Threshold for validation predictions. Use "auto" for automatic optimization.
+    
+    # Data balancing
+    balance_data: true
+    balance_strategy: 'smote'  # Options: 'undersample', 'oversample', 'smote'
+    smote_k_neighbors: 5
+    
+  regression:
+    # Label configuration
+    label_field: "soft_label"  # Field name in data
+    use_transformation: false  # Apply logit transformation
+
+# Model-Specific Settings
+model_specific:
+  mlp:
+    hidden_dims: [256, 128]
+    dropout_p: 0.5
